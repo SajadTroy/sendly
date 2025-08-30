@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require("multer");
 const path = require("path");
+const cron = require("node-cron");
 const { File } = require('../models');
 const router = express.Router();
 
@@ -62,6 +63,21 @@ router.get('/files/:shortCode', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
+    }
+});
+
+cron.schedule("0 1 * * *", async () => {
+    try {
+        const files = await File.find();
+        for (let file of files) {
+            if (file.createdAt < Date.now() - 24*60*60*1000) {
+                await File.deleteOne({ _id: file._id });
+                fs.unlinkSync(path.resolve(file.filePath));
+                console.log(`Deleted file: ${file.filePath}`);
+            }
+        }
+    } catch (err) {
+        console.error("Error during cleanup:", err);
     }
 });
 
