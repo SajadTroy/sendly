@@ -1,0 +1,77 @@
+require('dotenv').config();
+const express = require('express');
+const colors = require('colors');
+const morgan = require("morgan");
+const path = require('path');
+const cookieSession = require('cookie-session');
+const expressLayouts = require('express-ejs-layouts');
+const fs = require("fs");
+const connectDB = require('./models/config');
+
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, "access.log"),
+    { flags: "a" }
+);
+
+// Define a custom token for coloring status code
+morgan.token('status', (req, res) => {
+    const status = res.statusCode;
+    let color = status >= 500 ? 'red'    // server error
+        : status >= 400 ? 'yellow' // client error
+            : status >= 300 ? 'cyan'   // redirection
+                : status >= 200 ? 'green'  // success
+                    : 'reset';                 // default
+
+    return colors[color](status);
+});
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
+app.use(
+    morgan((tokens, req, res) => {
+        return [
+            colors.blue(tokens.method(req, res)),
+            colors.magenta(tokens.url(req, res)),
+            tokens.status(req, res),
+            colors.cyan(tokens['response-time'](req, res) + ' ms'),
+        ].join(' ');
+    })
+);
+app.use(morgan("combined", { stream: accessLogStream }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'index_layout');
+
+// Use cookie-session middleware
+app.use(cookieSession({
+    name: 'session',
+    keys: ['hi@23', 'hello@23'],
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+}));
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Routes
+const indexRouter = require('./routes/index');
+
+app.use('/', indexRouter);
+
+app.use((req, res) => {
+    res.status(404).send('404 Not Found');
+});
+
+// Start server
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+    connectDB().then(() => {
+        console.log("Connected to MongoDB");
+    }).catch((err) => {
+        console.error("Failed to connect to MongoDB", err);
+    });
+});

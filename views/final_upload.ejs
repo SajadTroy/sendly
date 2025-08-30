@@ -1,0 +1,15 @@
+<div class="copy-container">
+    <input type="text" id="copyInput" value="<%- fileUrl %>" readonly>
+    <button onclick="copyText()">Copy</button>
+  </div>
+
+  <script>
+    function copyText() {
+      const input = document.getElementById("copyInput");
+      input.select();
+      input.setSelectionRange(0, 99999); // For mobile
+      navigator.clipboard.writeText(input.value)
+        .then(() => alert("Copied: " + input.value))
+        .catch(err => console.error("Error copying text: ", err));
+    }
+  </script>
