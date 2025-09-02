@@ -1,0 +1,332 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+button {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    cursor: pointer;
+    outline: none;
+    color: #333;
+}
+
+.poppins-thin {
+    font-family: "Poppins", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+.poppins-extralight {
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-style: normal;
+}
+
+.poppins-light {
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+}
+
+.poppins-regular {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.poppins-medium {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.poppins-semibold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+}
+
+.poppins-bold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.poppins-extrabold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-style: normal;
+}
+
+.poppins-black {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-style: normal;
+}
+
+.poppins-thin-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 100;
+    font-style: italic;
+}
+
+.poppins-extralight-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-style: italic;
+}
+
+.poppins-light-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-style: italic;
+}
+
+.poppins-regular-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: italic;
+}
+
+.poppins-medium-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-style: italic;
+}
+
+.poppins-semibold-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.poppins-bold-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    font-style: italic;
+}
+
+.poppins-extrabold-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-style: italic;
+}
+
+.poppins-black-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-style: italic;
+}
+
+/* Desktop Header */
+
+.desktop_header {
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.desktop_header .left_header {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+.desktop_header .left_header a {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.desktop_header .left_header a img {
+    width: 160px;
+}
+
+.desktop_header .right_header {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 20px;
+}
+
+.desktop_header .right_header .menu_bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+.desktop_header .right_header .menu_bar .menu_items {
+    width: 450px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+}
+
+.desktop_header .right_header .menu_bar .menu_items .menu_item a {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+}
+
+.desktop_header .right_header .menu_bar .menu_items .menu_item a:hover {
+    color: #fc2779;
+    border-bottom: 2px solid #fc2779;
+}
+
+.desktop_header .right_header .menu_bar .menu_items .menu_item a.active {
+    color: #fc2779;
+    border-bottom: 2px solid #fc2779;
+}
+
+/* Mobile Header */
+
+.mobile_header {
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.mobile_header .left_header {
+    width: 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+.mobile_header .left_header button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.mobile_header .right_header {
+    width: calc(100% - 60px);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.mobile_header .right_header a {
+    display: flex;
+    align-items: center;
+}
+
+.mobile_header .right_header a img {
+    width: 160px;
+}
+
+.hiden {
+    display: none !important;
+}
+
+.mobile_menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile_menu .top_bar {
+    width: 100%;
+    height: 60px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.mobile_menu .top_bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile_menu .menu_body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+}
+
+.mobile_menu .menu_body .menu_items {
+    list-style: none;
+    width: 100%;
+}
+
+.mobile_menu .menu_body .menu_items .menu_item {
+    margin: 0px;
+    height: 40px;
+}
+
+.mobile_menu .menu_body .menu_items .menu_item a {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    border-left: 4px solid transparent;
+}
+
+.mobile_menu .menu_body .menu_items .menu_item a:hover {
+    color: #fc2779;
+    border-left: 4px solid #fc2779;
+    padding-left: 20px;
+}
+
+/* Header Handling Resposnive */
+
+@media (max-width: 768px) {
+  .desktop_header {
+    display: none;
+  }
+}
+@media (min-width: 769px) {
+  .mobile_header {
+    display: none;
+  }
+}

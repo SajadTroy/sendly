@@ -20,7 +20,7 @@ const upload = multer({ storage: storage });
 
 // Home route
 router.get('/', (req, res) => {
-    res.render('index', { title: 'Sendly - File Sharing Made Easy', description: 'Upload and share files easily with Sendly. Files are available for 24 hours.' });
+    res.render('home', { title: 'Sendly - File Sharing Made Easy', description: 'Upload and share files easily with Sendly. Files are available for 24 hours.' });
 });
 
 router.post('/upload', upload.single("file"), async (req, res) => {
@@ -39,7 +39,7 @@ router.post('/upload', upload.single("file"), async (req, res) => {
         console.log("File saved to database", fileData);
 
         let fileUrl = `${req.protocol}://${req.get('host')}/files/${fileData.shortCode}`;
-        res.render('final_upload', { title: `Your file "${req.file.filename}" uploaded succesfull`, fileUrl: fileUrl });
+        res.render('final_upload', { title: `Your file "${req.file.filename}" uploaded succesfull`, description: 'Share your file using the link below. Note: The file will be available for 24 hours.', fileUrl });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

@@ -1,106 +1,101 @@
 <style>
-    :root{
-  --bg: #ffffff;
-  --fg: #1f2937;
-  --muted: #6b7280;
-  --accent: #2563eb;
-  --border: #d1d5db;
-  --radius: 12px;
-  --gap: 12px;
-  --gap-lg: 16px;
-  --maxw: 720px;
-}
+  /* Copy Card */
+  .copy-card {
+    width: 100%;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+  }
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;background:#f8fafc;color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;line-height:1.5;}
-.copy-card{
-  max-width: var(--maxw);
-  margin: clamp(12px,4vw,40px) auto;
-  padding: clamp(12px,3vw,24px);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-.legend{
-  display:block;
-  font-weight:600;
-  font-size: clamp(16px,2.5vw,20px);
-  margin-bottom: var(--gap);
-}
-.copy-row{
-  display:flex;
-  gap: var(--gap);
-  align-items:center;
-  flex-wrap:wrap;
-}
-.copy-input{
-  flex:1 1 320px;
-  min-width: 220px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #f9fafb;
-  color: var(--fg);
-}
-.copy-input:focus-visible{
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-.btn{
-  appearance:none;
-  border:1px solid var(--border);
-  background:#eef2ff;
-  color:#111827;
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-}
-.btn.primary{ background:#e0e7ff; }
-.btn:focus-visible{
-  outline:3px solid var(--accent);
-  outline-offset:2px;
-}
-.status{
-  margin: var(--gap) 0 0 0;
-  color: var(--muted);
-  min-height: 1.25em;
-  font-size: 0.95rem;
-}
+  .copy-title {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+  }
 
-/* Mobile tweaks */
-@media (max-width: 520px){
-  .copy-row{flex-direction:column; align-items:stretch;}
-  .btn{width:100%; text-align:center;}
-}
+  .copy-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
+  .copy-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    color: #333;
+    background: #f9f9f9;
+  }
+
+  .copy-input:focus {
+    outline: none;
+    border-color: #fc2779;
+    box-shadow: 0 0 0 2px rgba(252, 39, 121, 0.15);
+  }
+
+  .copy-btn {
+    background: #fc2779;
+    color: #fff;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+
+  .copy-btn:hover {
+    background: #e0206b;
+  }
+
+  .status {
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666;
+  }
 </style>
 
 <div class="copy-card">
-  <label for="copyInput" class="legend">File link</label>
+  <label for="copyInput" class="copy-title">Your File Link</label>
+
   <div class="copy-row">
-    <input type="text" id="copyInput" value="<%- fileUrl %>" readonly class="copy-input" aria-describedby="copyStatus" />
-    <button type="button" class="btn primary" id="copyBtn" aria-controls="copyInput" aria-label="Copy link to clipboard">Copy</button>
+    <input type="text" id="copyInput" value="<%- fileUrl %>" readonly class="copy-input"
+      aria-describedby="copyStatus" />
+
+    <button type="button" class="btn copy-btn" id="copyBtn" aria-controls="copyInput"
+      aria-label="Copy link to clipboard">
+      Copy
+    </button>
   </div>
+
   <p id="copyStatus" class="status" role="status" aria-live="polite"></p>
 </div>
 
 <script>
-  (function(){
+  (function () {
     const btn = document.getElementById('copyBtn');
     const input = document.getElementById('copyInput');
     const status = document.getElementById('copyStatus');
 
-    function setStatus(msg, ok=true){
+    function setStatus(msg, ok = true) {
       status.textContent = msg;
       status.style.color = ok ? '#065f46' : '#b91c1c';
     }
 
-    async function copyWithClipboardAPI(text){
+    async function copyWithClipboardAPI(text) {
       await navigator.clipboard.writeText(text);
     }
 
-    function copyWithExecCommand(el){
+    function copyWithExecCommand(el) {
       // Select the text and use deprecated-but-supported fallback
       const prevReadOnly = el.readOnly;
       el.readOnly = false; // some browsers require non-readonly for select + execCommand
@@ -151,7 +146,7 @@ html,body{margin:0;padding:0;background:#f8fafc;color:var(--fg);font-family:syst
             const ok = copyWithExecCommand(input);
             if (ok) setStatus('Copied link to clipboard.');
           }
-        } catch {}
+        } catch { }
       }
     });
   })();
