@@ -1,6 +1,8 @@
 const express = require('express');
 const multer = require("multer");
 const path = require("path");
+const Busboy = require('busboy');
+const fs = require('fs');
 const cron = require("node-cron");
 const { File } = require('../models');
 const router = express.Router();
@@ -16,36 +18,39 @@ const storage = multer.diskStorage({
 });
 
 // Initialize multer
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 500 * 1024 * 1024 }
+});
 
 // Home route
 router.get('/', (req, res) => {
     res.render('home', { title: 'Sendly - File Sharing Made Easy', description: 'Upload and share files easily with Sendly. Files are available for 24 hours.' });
 });
 
-router.post('/upload', upload.single("file"), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.send("No file uploaded.");
-        }
-        console.log(req.file);
+router.post('/upload', (req, res) => {
+  const busboy = Busboy({ headers: req.headers });
+  let filePath = '';
 
-        const fileData = new File({
-            filePath: req.file.path,
-            shortCode: Math.random().toString(36).substring(2, 8)
-        });
+  busboy.on('file', (name, file, info) => {
+    const filename = Date.now() + path.extname(info.filename);
+    filePath = path.join("uploads", filename);
+    const saveTo = path.join(__dirname, "..", filePath);
+    file.pipe(fs.createWriteStream(saveTo));
+  });
 
-        await fileData.save();
-        console.log("File saved to database", fileData);
+  busboy.on('finish', async () => {
+    const fileData = new File({
+      filePath,
+      shortCode: Math.random().toString(36).substring(2, 8)
+    });
+    await fileData.save();
 
-        let fileUrl = `${req.protocol}://${req.get('host')}/files/${fileData.shortCode}`;
-        // res.render('final_upload', { title: `Your file "${req.file.filename}" uploaded succesfull`, description: 'Share your file using the link below. Note: The file will be available for 24 hours.', fileUrl });
+    let fileUrl = `${req.protocol}://${req.get('host')}/files/${fileData.shortCode}`;
+    res.json({ file_url: fileUrl });
+  });
 
-        res.json({ file_url: fileUrl });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
-    }
+  req.pipe(busboy);
 });
 
 router.get('/files/:shortCode', async (req, res) => {
@@ -83,7 +88,7 @@ cron.schedule("0 1 * * *", async () => {
     try {
         const files = await File.find();
         for (let file of files) {
-            if (file.createdAt < Date.now() - 24*60*60*1000) {
+            if (file.createdAt < Date.now() - 24 * 60 * 60 * 1000) {
                 await File.deleteOne({ _id: file._id });
                 fs.unlinkSync(path.resolve(file.filePath));
                 console.log(`Deleted file: ${file.filePath}`);
