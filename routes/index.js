@@ -57,11 +57,22 @@ router.get('/files/:shortCode', async (req, res) => {
             return res.status(404).send('File not found');
         }
 
-        if (fileData.createdAt < Date.now() - 24*60*60*1000) {
+        if (fileData.createdAt < Date.now() - 24 * 60 * 60 * 1000) {
             return res.status(410).send('File has expired');
         }
 
-        res.download(path.resolve(fileData.filePath));
+        const absolutePath = path.join(__dirname, '..', fileData.filePath);
+
+        res.setHeader("Content-Disposition", `attachment; filename="${path.basename(absolutePath)}"`);
+        res.setHeader("Content-Type", "application/octet-stream");
+        res.setHeader("Accept-Ranges", "none");
+
+        res.sendFile(absolutePath, (err) => {
+            if (err) {
+                console.error("SendFile error:", err);
+                res.status(500).send("Error sending file");
+            }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
