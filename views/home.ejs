@@ -121,14 +121,14 @@
   <fieldset class="upload-card">
     <legend class="upload-title">Upload Your File</legend>
 
-    <!-- File Input Row -->
+    <!-- File Input -->
     <div class="file-row">
-      <input type="file" name="file" id="file" required class="visually-hidden" />
+      <input type="file" id="file" required class="visually-hidden" />
       <label for="file" class="btn choose-btn">Choose File</label>
       <span id="file-chosen" class="file-name">No file chosen</span>
     </div>
 
-    <!-- Submit Button -->
+    <!-- Submit -->
     <button type="submit" class="btn upload-btn">Upload File</button>
 
     <!-- Progress -->
@@ -145,74 +145,61 @@
 </form>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const fileInput = document.getElementById("file");
-    const fileName = document.getElementById("file-chosen");
-    const form = document.getElementById("uploadForm");
-    const progressBar = document.getElementById("progress-bar");
-    const progressContainer = document.querySelector(".progress-container");
-    const progressText = document.getElementById("progress-text");
-    const fileLinkBox = document.getElementById("file-link");
-    const fileUrl = document.getElementById("file-url");
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInput = document.getElementById("file");
+  const fileName = document.getElementById("file-chosen");
+  const form = document.getElementById("uploadForm");
+  const progressBar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+  const fileLinkBox = document.getElementById("file-link");
+  const fileUrl = document.getElementById("file-url");
 
-    // Show file name
-    fileInput.addEventListener("change", () => {
-      fileName.textContent =
-        fileInput.files.length > 0
-          ? fileInput.files[0].name
-          : "No file chosen";
-    });
-
-    // Handle upload with progress
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      if (fileInput.files.length === 0) {
-        alert("Please choose a file first.");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/upload");
-
-      // Progress
-      xhr.upload.addEventListener("progress", (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + "%";
-          progressText.textContent = percent + "%";
-
-          progressContainer.style.display = "block";
-          progressText.style.display = "block";
-        }
-      });
-
-      // On complete
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          progressText.textContent = "Upload complete!";
-          progressBar.style.background = "#4caf50";
-
-          try {
-            const response = JSON.parse(xhr.responseText);
-            if (response.file_url) {
-              fileUrl.href = response.file_url;
-              fileUrl.textContent = response.file_url;
-              fileLinkBox.style.display = "block";
-            }
-          } catch (err) {
-            console.error("Invalid JSON response", err);
-          }
-        } else {
-          progressText.textContent = "Upload failed!";
-          progressBar.style.background = "#f44336";
-        }
-      };
-
-      xhr.send(formData);
-    });
+  fileInput.addEventListener("change", () => {
+    fileName.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : "No file chosen";
   });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (fileInput.files.length === 0) {
+      alert("Please choose a file first.");
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const chunkSize = 5 * 1024 * 1024; // 5MB
+    const totalChunks = Math.ceil(file.size / chunkSize);
+
+    for (let i = 0; i < totalChunks; i++) {
+      const chunk = file.slice(i * chunkSize, (i + 1) * chunkSize);
+      const formData = new FormData();
+      formData.append("chunk", chunk);
+      formData.append("fileName", file.name);
+      formData.append("chunkIndex", i);
+      formData.append("totalChunks", totalChunks);
+
+      await fetch("/upload-chunk", { method: "POST", body: formData });
+
+      const percent = Math.round(((i + 1) / totalChunks) * 100);
+      progressBar.style.width = percent + "%";
+      progressText.textContent = percent + "%";
+    }
+
+    // Merge chunks
+    const mergeRes = await fetch("/merge-chunks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileName: file.name, totalChunks })
+    });
+
+    const result = await mergeRes.json();
+    if (result.file_url) {
+      fileUrl.href = result.file_url;
+      fileUrl.textContent = result.file_url;
+      fileLinkBox.style.display = "block";
+      progressText.textContent = "Upload complete!";
+      progressBar.style.background = "#4caf50";
+    }
+  });
+});
 </script>
