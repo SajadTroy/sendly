@@ -72,52 +72,45 @@ router.post("/merge-chunks", async (req, res) => {
 router.get('/files/:shortCode', async (req, res) => {
     try {
         const { shortCode } = req.params;
+        console.log(`Request for shortCode: ${shortCode}`); // Debug log
         const fileData = await File.findOne({ shortCode });
         if (!fileData) {
+            console.log(`File not found for shortCode: ${shortCode}`);
             return res.status(404).send('File not found');
         }
 
         if (fileData.createdAt < Date.now() - 24 * 60 * 60 * 1000) {
+            console.log(`File expired for shortCode: ${shortCode}`);
             return res.status(410).send('File has expired');
         }
 
         const absolutePath = path.join(__dirname, '..', fileData.filePath);
+        if (!fs.existsSync(absolutePath)) {
+            console.log(`File missing on disk: ${absolutePath}`);
+            return res.status(404).send('File not found on server');
+        }
 
-        // Get file size for Content-Length header
         const stats = fs.statSync(absolutePath);
-        const fileSize = stats.size;
+        console.log(`Serving file: ${absolutePath}, Size: ${stats.size}`); // Debug log
 
-        // Set headers for download
         res.setHeader("Content-Disposition", `attachment; filename="${path.basename(absolutePath)}"`);
         res.setHeader("Content-Type", "application/octet-stream");
-        res.setHeader("Content-Length", fileSize);
-        res.setHeader("Accept-Ranges", "bytes"); // Support range requests for download managers
+        res.setHeader("Content-Length", stats.size);
+        res.setHeader("Accept-Ranges", "bytes");
 
-        // Stream the file
         const readStream = fs.createReadStream(absolutePath);
-        
         readStream.on('error', (err) => {
             if (!res.headersSent) {
                 console.error("Stream error:", err);
                 res.status(500).send("Error streaming file");
             }
         });
-
-        readStream.on('close', () => {
-            if (!res.headersSent) {
-                res.end();
-            }
-        });
-
-        // Pipe the file stream to the response
         readStream.pipe(res);
 
-        // Handle client abort
         req.on('aborted', () => {
             console.log("Client aborted download");
-            readStream.destroy(); // Stop the read stream
+            readStream.destroy();
         });
-
     } catch (err) {
         if (!res.headersSent) {
             console.error("Download error:", err);
