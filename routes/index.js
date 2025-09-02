@@ -39,7 +39,9 @@ router.post('/upload', upload.single("file"), async (req, res) => {
         console.log("File saved to database", fileData);
 
         let fileUrl = `${req.protocol}://${req.get('host')}/files/${fileData.shortCode}`;
-        res.render('final_upload', { title: `Your file "${req.file.filename}" uploaded succesfull`, description: 'Share your file using the link below. Note: The file will be available for 24 hours.', fileUrl });
+        // res.render('final_upload', { title: `Your file "${req.file.filename}" uploaded succesfull`, description: 'Share your file using the link below. Note: The file will be available for 24 hours.', fileUrl });
+
+        res.json({ file_url: fileUrl });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

@@ -1,49 +1,49 @@
 <style>
   /* Upload Form Styling */
-.upload-form {
+  .upload-form {
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 40px auto;
     padding: 0 20px;
-}
+  }
 
-.upload-card {
+  .upload-card {
     width: 100%;
     max-width: 500px;
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 16px;
     padding: 30px 25px;
-}
+  }
 
-.upload-title {
+  .upload-title {
     font-size: 20px;
     font-weight: 600;
     color: #333;
     margin-bottom: 20px;
     display: block;
-}
+  }
 
-.file-row {
+  .file-row {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 25px;
-}
+  }
 
-.visually-hidden {
+  .visually-hidden {
     display: none;
-}
+  }
 
-.file-name {
+  .file-name {
     font-size: 14px;
     color: #666;
     font-weight: 400;
-}
+  }
 
-/* Buttons */
-.btn {
+  /* Buttons */
+  .btn {
     font-family: "Poppins", sans-serif;
     font-size: 14px;
     font-weight: 500;
@@ -52,30 +52,72 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-}
+  }
 
-.choose-btn {
+  .choose-btn {
     background: #f1f1f1;
     color: #333;
-}
+  }
 
-.choose-btn:hover {
+  .choose-btn:hover {
     background: #e0e0e0;
-}
+  }
 
-.upload-btn {
+  .upload-btn {
     background: #fc2779;
     color: #fff;
     width: 100%;
     text-align: center;
-}
+  }
 
-.upload-btn:hover {
+  .upload-btn:hover {
     background: #e0206b;
-}
+  }
+
+  /* Progress bar */
+  .progress-container {
+    margin-top: 20px;
+    width: 100%;
+    background: #f1f1f1;
+    border-radius: 8px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .progress-bar {
+    height: 12px;
+    width: 0%;
+    background: linear-gradient(90deg, #fc2779, #ff5c9a);
+    transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    text-align: right;
+    font-size: 12px;
+    color: #666;
+    margin-top: 6px;
+    display: none;
+  }
+
+  /* File URL display */
+  .file-link {
+    margin-top: 15px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .file-link a {
+    color: #fc2779;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .file-link a:hover {
+    text-decoration: underline;
+  }
 </style>
 
-<form action="/upload" method="post" enctype="multipart/form-data" class="upload-form" novalidate>
+<form id="uploadForm" class="upload-form" novalidate>
   <fieldset class="upload-card">
     <legend class="upload-title">Upload Your File</legend>
 
@@ -88,20 +130,89 @@
 
     <!-- Submit Button -->
     <button type="submit" class="btn upload-btn">Upload File</button>
+
+    <!-- Progress -->
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-text" id="progress-text">0%</div>
+
+    <!-- File URL -->
+    <div class="file-link" id="file-link">
+      File uploaded: <a href="#" target="_blank" id="file-url">Open file</a>
+    </div>
   </fieldset>
 </form>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-  const fileInput = document.getElementById("file");
-  const fileName = document.getElementById("file-chosen");
+    const fileInput = document.getElementById("file");
+    const fileName = document.getElementById("file-chosen");
+    const form = document.getElementById("uploadForm");
+    const progressBar = document.getElementById("progress-bar");
+    const progressContainer = document.querySelector(".progress-container");
+    const progressText = document.getElementById("progress-text");
+    const fileLinkBox = document.getElementById("file-link");
+    const fileUrl = document.getElementById("file-url");
 
-  if (fileInput) {
+    // Show file name
     fileInput.addEventListener("change", () => {
-      fileName.textContent = fileInput.files.length > 0
-        ? fileInput.files[0].name
-        : "No file chosen";
+      fileName.textContent =
+        fileInput.files.length > 0
+          ? fileInput.files[0].name
+          : "No file chosen";
     });
-  }
-});
+
+    // Handle upload with progress
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      if (fileInput.files.length === 0) {
+        alert("Please choose a file first.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload");
+
+      // Progress
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
+          progressText.textContent = percent + "%";
+
+          progressContainer.style.display = "block";
+          progressText.style.display = "block";
+        }
+      });
+
+      // On complete
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          progressText.textContent = "Upload complete!";
+          progressBar.style.background = "#4caf50";
+
+          try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.file_url) {
+              fileUrl.href = response.file_url;
+              fileUrl.textContent = response.file_url;
+              fileLinkBox.style.display = "block";
+            }
+          } catch (err) {
+            console.error("Invalid JSON response", err);
+          }
+        } else {
+          progressText.textContent = "Upload failed!";
+          progressBar.style.background = "#f44336";
+        }
+      };
+
+      xhr.send(formData);
+    });
+  });
 </script>
