@@ -1,8 +1,6 @@
 const express = require('express');
 const multer = require("multer");
 const path = require("path");
-const Busboy = require('busboy');
-const fs = require('fs');
 const cron = require("node-cron");
 const { File } = require('../models');
 const router = express.Router();
@@ -28,29 +26,29 @@ router.get('/', (req, res) => {
     res.render('home', { title: 'Sendly - File Sharing Made Easy', description: 'Upload and share files easily with Sendly. Files are available for 24 hours.' });
 });
 
-router.post('/upload', (req, res) => {
-  const busboy = Busboy({ headers: req.headers });
-  let filePath = '';
+router.post('/upload', upload.single("file"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.send("No file uploaded.");
+        }
+        console.log(req.file);
 
-  busboy.on('file', (name, file, info) => {
-    const filename = Date.now() + path.extname(info.filename);
-    filePath = path.join("uploads", filename);
-    const saveTo = path.join(__dirname, "..", filePath);
-    file.pipe(fs.createWriteStream(saveTo));
-  });
+        const fileData = new File({
+            filePath: req.file.path,
+            shortCode: Math.random().toString(36).substring(2, 8)
+        });
 
-  busboy.on('finish', async () => {
-    const fileData = new File({
-      filePath,
-      shortCode: Math.random().toString(36).substring(2, 8)
-    });
-    await fileData.save();
+        await fileData.save();
+        console.log("File saved to database", fileData);
 
-    let fileUrl = `${req.protocol}://${req.get('host')}/files/${fileData.shortCode}`;
-    res.json({ file_url: fileUrl });
-  });
+        let fileUrl = `${req.protocol}://${req.get('host')}/files/${fileData.shortCode}`;
+        // res.render('final_upload', { title: `Your file "${req.file.filename}" uploaded succesfull`, description: 'Share your file using the link below. Note: The file will be available for 24 hours.', fileUrl });
 
-  req.pipe(busboy);
+        res.json({ file_url: fileUrl });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 });
 
 router.get('/files/:shortCode', async (req, res) => {
