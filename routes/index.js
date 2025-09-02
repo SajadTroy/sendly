@@ -20,7 +20,7 @@ const upload = multer({ storage: storage });
 
 // Home route
 router.get('/', (req, res) => {
-    res.render('index', { title: 'Sendly - File Sharing Made Easy' });
+    res.render('index', { title: 'Sendly - File Sharing Made Easy', description: 'Upload and share files easily with Sendly. Files are available for 24 hours.' });
 });
 
 router.post('/upload', upload.single("file"), async (req, res) => {
