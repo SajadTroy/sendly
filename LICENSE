@@ -1,0 +1,46 @@
+Business Source License 1.1
+
+Parameters
+
+Licensor:             Grovix
+Licensed Work:        Sendly
+                      The Licensed Work is (c) 2025 Grovix.
+Additional Use Grant: You may make non-production use of the Licensed Work,
+                      including for personal projects, educational purposes,
+                      research, testing, and open-source contributions,
+                      without charge.
+
+Change Date:          2029-09-03
+Change License:       Apache License, Version 2.0
+
+Terms
+
+The Licensor hereby grants you the right to copy, modify, create derivative
+works, redistribute, and make non-production use of the Licensed Work.  
+The Licensor may make an Additional Use Grant, above, permitting limited
+production use.
+
+Effective on the Change Date, the License will convert to the Change License
+specified above.
+
+Production Use Limitation
+You may not use the Licensed Work for production purposes (including
+commercial use, offering it as a service, or integrating into business
+products) without purchasing a commercial license from Grovix.
+Visit https://sendly.me for licensing information.
+
+Notices
+You must retain the following attribution in all copies or substantial
+portions of the Licensed Work:
+
+    Sendly, (c) 2025 Grovix - Licensed under the Business Source License 1.1
+    https://sendly.me
+
+Disclaimer
+THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE LICENSED WORK OR THE USE OR OTHER DEALINGS
+IN THE LICENSED WORK.
