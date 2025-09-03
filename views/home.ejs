@@ -104,16 +104,47 @@
     margin-top: 15px;
     font-size: 14px;
     display: none;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    min-width: 0;
   }
 
-  .file-link a {
-    color: #fc2779;
-    font-weight: 600;
-    text-decoration: none;
+  .file-url-input {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: none;
+    border-right: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    min-width: 0;
   }
 
-  .file-link a:hover {
-    text-decoration: underline;
+  .copy-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .copy-btn:hover {
+    background: #f1f1f1;
+  }
+
+  .copy-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: #333;
   }
 </style>
 
@@ -139,7 +170,10 @@
 
     <!-- File URL -->
     <div class="file-link" id="file-link">
-      File uploaded: <a href="#" target="_blank" id="file-url">Open file</a>
+      <input type="text" id="file-url" class="file-url-input" readonly />
+      <button type="button" id="copy-btn" class="copy-btn" title="Copy link">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d='M20.829 12.861c.171-.413.171-.938.171-1.986s0-1.573-.171-1.986a2.25 2.25 0 0 0-1.218-1.218c-.413-.171-.938-.171-1.986-.171H11.1c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C7.5 9.209 7.5 9.839 7.5 11.1v6.525c0 1.048 0 1.573.171 1.986.229.551.667.99 1.218 1.218.413.171.938.171 1.986.171s1.573 0 1.986-.171m7.968-7.968a2.25 2.25 0 0 1-1.218 1.218c-.413.171-.938.171-1.986.171s-1.573 0-1.986.171a2.25 2.25 0 0 0-1.218 1.218c-.171.413-.171.938-.171 1.986s0 1.573-.171 1.986a2.25 2.25 0 0 1-1.218 1.218m7.968-7.968a11.68 11.68 0 0 1-7.75 7.9l-.218.068M16.5 7.5v-.9c0-1.26 0-1.89-.245-2.371a2.25 2.25 0 0 0-.983-.984C14.79 3 14.16 3 12.9 3H6.6c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C3 4.709 3 5.339 3 6.6v6.3c0 1.26 0 1.89.245 2.371.216.424.56.768.984.984.48.245 1.111.245 2.372.245H7.5'/></svg>
+      </button>
     </div>
   </fieldset>
 </form>
@@ -153,7 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const progressText = document.getElementById("progress-text");
   const progressContainer = document.querySelector(".progress-container");
   const fileLinkBox = document.getElementById("file-link");
-  const fileUrl = document.getElementById("file-url");
+  const fileUrlInput = document.getElementById("file-url");
+  const copyBtn = document.getElementById("copy-btn");
 
   fileInput.addEventListener("change", () => {
     fileName.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : "No file chosen";
@@ -167,11 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Show progress bar and text
     progressContainer.style.display = "block";
     progressText.style.display = "block";
-    progressBar.style.width = "0%"; // Reset progress bar
-    progressText.textContent = "0%"; // Reset progress text
+    progressBar.style.width = "0%";
+    progressText.textContent = "0%";
 
     const file = fileInput.files[0];
     const chunkSize = 5 * 1024 * 1024; // 5MB
@@ -188,39 +222,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const response = await fetch("/upload-chunk", { method: "POST", body: formData });
 
-        if (!response.ok) {
-          throw new Error(`Chunk ${i} upload failed: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Chunk ${i} upload failed: ${response.statusText}`);
 
         const percent = Math.round(((i + 1) / totalChunks) * 100);
         progressBar.style.width = `${percent}%`;
         progressText.textContent = `${percent}%`;
       }
 
-      // Merge chunks
       const mergeRes = await fetch("/merge-chunks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileName: file.name, totalChunks }),
       });
 
-      if (!mergeRes.ok) {
-        throw new Error(`Merge failed: ${mergeRes.statusText}`);
-      }
+      if (!mergeRes.ok) throw new Error(`Merge failed: ${mergeRes.statusText}`);
 
       const result = await mergeRes.json();
       if (result.file_url) {
-        fileUrl.href = result.file_url;
-        fileUrl.textContent = result.file_url;
-        fileLinkBox.style.display = "block";
+        fileUrlInput.value = result.file_url;
+        fileLinkBox.style.display = "flex";
         progressText.textContent = "Upload complete!";
         progressBar.style.background = "#4caf50";
       }
     } catch (error) {
       console.error("Upload error:", error);
       progressText.textContent = "Upload failed!";
-      progressBar.style.background = "#ff4444"; // Red for error
+      progressBar.style.background = "#ff4444";
     }
+  });
+
+  copyBtn.addEventListener("click", () => {
+    fileUrlInput.select();
+    fileUrlInput.setSelectionRange(0, 99999); // mobile support
+    navigator.clipboard.writeText(fileUrlInput.value).then(() => {
+      copyBtn.style.background = "#d4edda"; // success feedback
+      setTimeout(() => (copyBtn.style.background = "transparent"), 1000);
+    });
   });
 });
 </script>
